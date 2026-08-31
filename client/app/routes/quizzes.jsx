@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
 import { fetchQuizzes } from '../api.js';
-
+import { Link, useLoaderData } from 'react-router';  
 /**
  * La liste de l'animateur : ses questionnaires. (Tous, en fait — les
  * comptes arrivent à la semaine 5.)
@@ -19,12 +18,20 @@ import { fetchQuizzes } from '../api.js';
  *    const quizzes = useLoaderData();
  * 3. Réaffichez la source de la page : les titres y sont, déjà en HTML.
  */
-export default function Quizzes() {
-  const [quizzes, setQuizzes] = useState([]);
+export async function loader() {
+  const response = await fetch('http://localhost:3000/api/quizzes');
+  if (!response.ok) {
+    throw new Error(`L'API répond : ${response.status}.`);
+  }
+  return response.json();
+}
 
-  useEffect(() => {
-    fetchQuizzes().then(setQuizzes).catch(() => {});
-  }, []);
+export default function Quizzes() {
+  const quizzes = useLoaderData();
+
+  // useEffect(() => {
+  //   fetchQuizzes().then(setQuizzes).catch(() => {});
+  // }, []);
 
   return (
     <main className="screen">

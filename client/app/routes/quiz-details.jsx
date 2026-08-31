@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router';
-import { fetchQuiz } from '../api.js';
+// import { Link, useParams } from 'react-router';
+// import { fetchQuiz } from '../api.js';
 
+import { Link, useLoaderData } from 'react-router';
 /**
  * Un questionnaire et ses questions — ce que l'animateur vérifie avant de
  * jouer. La bonne réponse est cochée : c'est la vue de l'AUTEUR.
@@ -15,13 +16,19 @@ import { fetchQuiz } from '../api.js';
  * 3. Dans le composant, remplacez useParams + useState + useEffect par
  *    const quiz = useLoaderData();
  */
-export default function QuizDetails() {
-  const { id } = useParams();
-  const [quiz, setQuiz] = useState(null);
 
-  useEffect(() => {
-    fetchQuiz(id).then(setQuiz).catch(() => {});
-  }, [id]);
+
+export async function loader({ params }) {
+  const response = await fetch(`http://localhost:3000/api/quizzes/${params.id}`);
+  if (!response.ok) {
+    throw new Error(`L'API répond : ${response.status}.`);
+  }
+  return response.json();
+}
+
+export default function QuizDetails() {
+  const quiz = useLoaderData();
+
 
   if (!quiz) return <main className="screen">Chargement…</main>;
 

@@ -16,7 +16,10 @@ import { db } from './db.js';
  * @returns {number} l'id de la partie créée
  */
 export function createGame(quizId, code, createdAt) {
-  throw new Error('À faire.');
+  const result = db
+    .prepare('INSERT INTO game (quiz_id, code, created_at) VALUES (?, ?, ?)')
+    .run(quizId, code, createdAt);
+  return result.lastInsertRowid;
 }
 
 /**
@@ -28,7 +31,10 @@ export function createGame(quizId, code, createdAt) {
  * @returns {number} l'id du joueur inscrit
  */
 export function addPlayer(gameId, nickname) {
-  throw new Error('À faire.');
+  const result = db
+    .prepare('INSERT INTO player (game_id, nickname) VALUES (?, ?)')
+    .run(gameId, nickname);
+  return result.lastInsertRowid;
 }
 
 // ── Fournies : les lectures ───────────────────────────────────────────────

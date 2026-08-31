@@ -28,7 +28,14 @@ db.exec('PRAGMA foreign_keys = ON');
  * 4. S'il n'y en a aucun, lire et exécuter seed.sql de la même façon.
  */
 export function initializeDatabase() {
-  console.warn('repository/db.js : initializeDatabase est À faire.');
+  const schema = readFileSync(fileURLToPath(new URL('schema.sql', dataDir)), 'utf8');
+  db.exec(schema);
+
+  const count = db.prepare('SELECT COUNT(*) AS n FROM quiz').get().n;
+  if (count === 0) {
+    const seed = readFileSync(fileURLToPath(new URL('seed.sql', dataDir)), 'utf8');
+    db.exec(seed);
+  }
 }
 
 /**
