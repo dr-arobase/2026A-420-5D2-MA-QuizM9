@@ -1,0 +1,30 @@
+# Quiz M9 d'une seule commande : docker compose up --build
+#
+# Deux services (deux conteneurs) sur un réseau privé où chacun joint l'autre
+# par son NOM : le client appelle l'API à http://api:3000.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - quizm9-data:/data
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      API_URL: http://api:3000
+    depends_on:
+      - api
+
+volumes:
+  # Le fichier SQLite vit ici, PAS dans le conteneur : il survit à
+  # docker compose down, et à la destruction du conteneur api.
+  quizm9-data:

@@ -7,7 +7,7 @@
  * n'est perdu.
  *
  * Le moteur ne fait aucun SQL lui-même : il passe par repository/. C'est la
- * règle de la semaine, et elle paiera à la semaine 4 (PostgreSQL).
+ * règle de la semaine, et elle paiera à la semaine 5 (PostgreSQL).
  *
  * Machine à états d'une partie (colonne game.state) :
  *   'lobby' → 'question' ⇄ 'results' → 'finished'

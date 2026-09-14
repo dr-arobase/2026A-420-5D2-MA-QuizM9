@@ -1,12 +1,18 @@
 /**
- * LA porte d'entrée vers la base. La règle de la semaine, valable jusqu'à la
- * fin de la session : aucune requête SQL en dehors du dossier repository/.
+ * LA porte d'entrée vers la base. La règle de la semaine 2, valable jusqu'à
+ * la fin de la session : aucune requête SQL en dehors du dossier repository/.
  *
- * La semaine 4, SQLite cède sa place à PostgreSQL : si tout le SQL est ici,
+ * La semaine 5, SQLite cède sa place à PostgreSQL : si tout le SQL est ici,
  * le changement reste confiné ici.
  */
 export { initializeDatabase, withTransaction } from './db.js';
-export { listQuizzes, getQuizWithQuestions } from './quizzes.js';
+export {
+  addQuestion,
+  createQuiz,
+  deleteQuestion,
+  getQuizWithQuestions,
+  listQuizzes,
+} from './quizzes.js';
 export {
   addPlayer,
   addPointsToPlayer,

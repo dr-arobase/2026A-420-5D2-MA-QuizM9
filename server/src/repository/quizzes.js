@@ -1,12 +1,12 @@
 /**
- * Les lectures des questionnaires. Tout le SQL sur quiz, question et choice
- * vit ici — nulle part ailleurs.
+ * Les lectures et écritures des questionnaires. Tout le SQL sur quiz,
+ * question et choice vit ici — nulle part ailleurs.
  */
-import { db } from './db.js';
+import { db, withTransaction } from './db.js';
+
+// ── Les lectures ──────────────────────────────────────────────────────────
 
 /**
- * Écrite en démonstration — votre MODÈLE pour une lecture.
- *
  * Tous les questionnaires, avec leur nombre de questions.
  * @returns {Array<{id: number, title: string, questionCount: number}>}
  */
@@ -53,4 +53,65 @@ export function getQuizWithQuestions(quizId) {
     }));
 
   return { id: quiz.id, title: quiz.title, questions };
+}
+
+// ── Les écritures de l'espace auteur (semaine 3) ──────────────────────────
+
+/**
+ * Crée un questionnaire vide. Pas de compte pour l'instant (semaine 5) :
+ * account_id reste NULL.
+ *
+ * @returns {number} l'id du questionnaire créé
+ */
+export function createQuiz(title) {
+  const result = db.prepare('INSERT INTO quiz (title) VALUES (?)').run(title);
+  return result.lastInsertRowid;
+}
+
+/**
+ * Ajoute une question à la fin d'un questionnaire, avec ses choix. La
+ * question et ses choix s'écrivent ENSEMBLE : une transaction.
+ *
+ * @param {{text: string, durationSeconds: number,
+ *   choices: Array<{text: string, isCorrect: boolean}>}} question
+ * @returns {number} l'id de la question créée
+ */
+export function addQuestion(quizId, question) {
+  return withTransaction(() => {
+    const { next } = db
+      .prepare('SELECT COALESCE(MAX(position), 0) + 1 AS next FROM question WHERE quiz_id = ?')
+      .get(quizId);
+
+    const questionId = db
+      .prepare(
+        `INSERT INTO question (quiz_id, position, text, duration_seconds)
+         VALUES (?, ?, ?, ?)`,
+      )
+      .run(quizId, next, question.text, question.durationSeconds).lastInsertRowid;
+
+    const insertChoice = db.prepare(
+      'INSERT INTO choice (question_id, text, is_correct) VALUES (?, ?, ?)',
+    );
+    for (const choice of question.choices) {
+      insertChoice.run(questionId, choice.text, choice.isCorrect ? 1 : 0);
+    }
+
+    return questionId;
+  });
+}
+
+/**
+ * Retire une question d'un questionnaire, choix compris. Échoue (clé
+ * étrangère) si la question a déjà été jouée : ses réponses la référencent.
+ *
+ * @returns {boolean} true si une question a été supprimée
+ */
+export function deleteQuestion(quizId, questionId) {
+  return withTransaction(() => {
+    db.prepare('DELETE FROM choice WHERE question_id = ?').run(questionId);
+    const result = db
+      .prepare('DELETE FROM question WHERE id = ? AND quiz_id = ?')
+      .run(questionId, quizId);
+    return result.changes > 0;
+  });
 }

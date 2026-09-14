@@ -218,3 +218,28 @@ button:disabled {
 .progress {
   color: #667;
 }
+
+/* L'éditeur : quatre choix, chacun avec son bouton radio « bonne réponse ». */
+.choices-edit {
+  border: 1px solid #ccc;
+  border-radius: 0.3rem;
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.choice-edit {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: normal;
+}
+
+.card.question.row form {
+  margin: 0;
+}
+
+button.secondary {
+  background: #667;
+}

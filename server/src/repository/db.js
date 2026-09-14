@@ -1,38 +1,33 @@
 /**
- * La connexion à la base. Un seul fichier SQLite : server/data/quizm9.db.
+ * La connexion à la base. Un seul fichier SQLite, server/data/quizm9.db par
+ * défaut ; la variable d'environnement DB_PATH permet de le placer ailleurs
+ * (dans un conteneur, sur un volume : semaine 3).
  *
  * Le fichier n'est pas versionné : chacun a le sien, régénéré au besoin.
- * Pour repartir à neuf : arrêtez le serveur et supprimez server/data/quizm9.db.
+ * Pour repartir à neuf : arrêtez le serveur et supprimez le fichier.
  */
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const dataDir = new URL('../../data/', import.meta.url);
+const dbPath = process.env.DB_PATH ?? fileURLToPath(new URL('quizm9.db', dataDir));
 
-export const db = new DatabaseSync(fileURLToPath(new URL('quizm9.db', dataDir)));
+mkdirSync(dirname(dbPath), { recursive: true });
+export const db = new DatabaseSync(dbPath);
 
 // Les lecteurs (le harnais, un autre processus) ne bloquent pas le serveur.
 db.exec('PRAGMA journal_mode = WAL');
 db.exec('PRAGMA foreign_keys = ON');
 
-/**
- * TODO (jalon ①) : créer les tables, puis les remplir si la base est vide.
- *
- * 1. Lire le fichier schema.sql : readFileSync(chemin, 'utf8'). Le chemin
- *    se construit comme celui de quizm9.db ci-dessus, à partir de dataDir.
- * 2. L'exécuter d'un bloc avec db.exec(...). Le schéma est en
- *    CREATE TABLE IF NOT EXISTS : le réexécuter à chaque démarrage est
- *    sans danger.
- * 3. Compter les questionnaires
- * 4. S'il n'y en a aucun, lire et exécuter seed.sql de la même façon.
- */
+/** Crée les tables (schema.sql), puis les remplit (seed.sql) si la base est vide. */
 export function initializeDatabase() {
   const schema = readFileSync(fileURLToPath(new URL('schema.sql', dataDir)), 'utf8');
   db.exec(schema);
 
-  const count = db.prepare('SELECT COUNT(*) AS n FROM quiz').get().n;
-  if (count === 0) {
+  const { n } = db.prepare('SELECT COUNT(*) AS n FROM quiz').get();
+  if (n === 0) {
     const seed = readFileSync(fileURLToPath(new URL('seed.sql', dataDir)), 'utf8');
     db.exec(seed);
   }

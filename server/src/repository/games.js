@@ -7,11 +7,8 @@ import { db } from './db.js';
 // ── Les trois fonctions à écrire cette semaine ────────────────────────────
 
 /**
- * TODO (jalon ②) : insérer une partie et retourner son id.
- *
- * Un INSERT dans game — colonnes quiz_id, code et created_at ; state et
- * question_index ont des valeurs par défaut. Calquez recordAnswer, plus
- * bas : prepare, des « ? », run, puis retournez lastInsertRowid.
+ * Insère une partie. state et question_index partent de leurs valeurs par
+ * défaut : 'lobby', -1.
  *
  * @returns {number} l'id de la partie créée
  */
@@ -23,10 +20,7 @@ export function createGame(quizId, code, createdAt) {
 }
 
 /**
- * TODO (jalon ③) : inscrire un joueur dans une partie et retourner son id.
- *
- * Un INSERT dans player — colonnes game_id et nickname ; score part à 0
- * tout seul. Même modèle que createGame.
+ * Inscrit un joueur dans une partie. Son score part à 0 tout seul.
  *
  * @returns {number} l'id du joueur inscrit
  */

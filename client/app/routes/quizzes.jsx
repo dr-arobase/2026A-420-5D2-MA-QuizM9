@@ -1,37 +1,46 @@
-import { useEffect, useState } from 'react';
-import { fetchQuizzes } from '../api.js';
-import { Link, useLoaderData } from 'react-router';  
+import { Form, Link, data, redirect, useActionData, useLoaderData } from 'react-router';
+import { API_URL } from '../api-url.js';
+
 /**
  * La liste de l'animateur : ses questionnaires. (Tous, en fait — les
  * comptes arrivent à la semaine 5.)
  *
- * TODO (partie 2, jalon ①) : passer du rendu côté client au rendu côté
- * serveur. Pour l'instant, la page part vide et va chercher ses données
- * dans le navigateur, après le rendu — affichez la source de la page : les
- * questionnaires n'y sont pas. Reprenez le loader écrit ensemble au
- * tableau :
- *
- * 1. Exportez une fonction `loader` : elle s'exécute sur le serveur, AVANT
- *    le rendu. Elle appelle l'API par son adresse complète —
- *    fetch('http://localhost:3000/api/quizzes') — et retourne le JSON.
- * 2. Dans le composant, remplacez useState + useEffect par
- *    const quizzes = useLoaderData();
- * 3. Réaffichez la source de la page : les titres y sont, déjà en HTML.
+ * Rendu CÔTÉ SERVEUR : le loader s'exécute sur le serveur, AVANT le rendu.
  */
 export async function loader() {
-  const response = await fetch('http://localhost:3000/api/quizzes');
+  const response = await fetch(`${API_URL}/api/quizzes`);
   if (!response.ok) {
-    throw new Error(`L'API répond : ${response.status}.`);
+    throw new Error(`L'API répond ${response.status}.`);
   }
   return response.json();
 }
 
+/**
+ * L'action qui crée un questionnaire. React Router l'appelle quand le
+ * <Form method="post"> ci-dessous est envoyé ; elle s'exécute sur le
+ * serveur, comme le loader.
+ */
+export async function action({ request }) {
+  const formData = await request.formData();
+
+  const response = await fetch(`${API_URL}/api/quizzes`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ title: formData.get('title') }),
+  });
+  const body = await response.json();
+
+  if (!response.ok) {
+    // L'erreur retourne à la page, avec le code de l'API ; useActionData la lit.
+    return data({ error: body.error }, { status: response.status });
+  }
+  // Créé : on envoie l'auteur remplir son questionnaire.
+  return redirect(`/quizzes/${body.id}/edit`);
+}
+
 export default function Quizzes() {
   const quizzes = useLoaderData();
-
-  // useEffect(() => {
-  //   fetchQuizzes().then(setQuizzes).catch(() => {});
-  // }, []);
+  const actionData = useActionData();
 
   return (
     <main className="screen">
@@ -49,6 +58,19 @@ export default function Quizzes() {
           </li>
         ))}
       </ul>
+
+      {/* Un formulaire HTML classique : method et action, comme au livre
+          d'or. <Form> de React Router l'envoie à l'action de cette route
+          sans recharger la page — et rejoue le loader ensuite. */}
+      <Form method="post" className="card">
+        <h2>Nouveau questionnaire</h2>
+        <label>
+          Titre
+          <input name="title" placeholder="Titre du questionnaire" required />
+        </label>
+        {actionData?.error && <p className="error">{actionData.error}</p>}
+        <button>Créer</button>
+      </Form>
     </main>
   );
 }

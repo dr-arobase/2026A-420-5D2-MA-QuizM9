@@ -1,0 +1,29 @@
+# Quiz M9 sur un serveur où il n'y a QUE Docker : ni Node, ni le code source.
+# Les images viennent du registre, construites par l'intégration continue.
+#
+#   cp .env.example .env      puis mettre son compte GitHub dans OWNER
+#   docker compose pull       télécharge les images demandées par TAG
+#   docker compose up -d      démarre (ou remplace) les conteneurs
+#
+# TAG=latest suit chaque push sur main. TAG=sha-xxxxxxx épingle une version :
+# la prod ne change plus tant qu'on ne change pas cette ligne.
+
+services:
+  api:
+    image: ghcr.io/${OWNER}/quizm9-api:${TAG:-latest}
+    ports:
+      - "3000:3000"
+    volumes:
+      - quizm9-data:/data
+
+  client:
+    image: ghcr.io/${OWNER}/quizm9-client:${TAG:-latest}
+    ports:
+      - "5173:5173"
+    environment:
+      API_URL: http://api:3000
+    depends_on:
+      - api
+
+volumes:
+  quizm9-data:
