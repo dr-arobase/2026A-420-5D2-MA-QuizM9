@@ -20,7 +20,7 @@ function score(overrides) {
   });
 }
 
-test('bonne réponse instantanée = 8 (4 + bonus rapidité 3)', () => {
+test('bonne réponse instantanée = 8 (5 + bonus rapidité 3)', () => {
   assert.equal(score({}), 8);
 });
 
@@ -28,7 +28,7 @@ test('première bonne réponse instantanée = 10 (maximum)', () => {
   assert.equal(score({ isFirstCorrectAnswer: true }), 10);
 });
 
-test('bonne réponse à mi-parcours = 6 (4 + bonus rapidité 1)', () => {
+test('bonne réponse à mi-parcours = 6 (5 + bonus rapidité 1)', () => {
   assert.equal(score({ responseTimeMs: 10000 }), 6);
 });
 
@@ -37,14 +37,14 @@ test('mauvaise réponse = 0', () => {
 });
 
 test('bonne réponse après l’échéance = 0', () => {
-  assert.equal(score({ responseTimeMs: 24000 }), 0);
+  assert.equal(score({ responseTimeMs: 25000 }), 0);
 });
 
 // ── Jalon 1 : les cas limites ─────────────────────────────────────────────
 //
 // Remplacez chaque test.todo par un vrai test.
 
-test.todo('réponse exactement à l’échéance = 4 (acceptée, bonus rapidité 0)');
+test.todo('réponse exactement à l’échéance = 5 (acceptée, bonus rapidité 0)');
 test.todo('mauvaise réponse, même première et instantanée = 0');
 test.todo('première bonne réponse hors délai = 0 (pas de bonus)');
 test.todo('le bonus de rapidité ne dépasse jamais 3');
