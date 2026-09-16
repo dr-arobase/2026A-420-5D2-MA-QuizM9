@@ -31,9 +31,56 @@ test('un titre valide crée le questionnaire (201)', async () => {
 
 // ── Jalon 2 ───────────────────────────────────────────────────────────────
 
-test.todo('une question sans bonne réponse est refusée (400)');
-test.todo('une question avec deux bonnes réponses est refusée (400)');
-test.todo('une question valide est ajoutée et apparaît dans GET /api/quizzes/:id');
+test('une question sans bonne réponse est refusée (400)', async () => {
+  const { data: quiz } = await api.request('POST', '/api/quizzes', { title: 'Capitales' });
+
+  const { status, data } = await api.request('POST', `/api/quizzes/${quiz.id}/questions`, {
+    text: 'Quelle est la capitale de la France ?',
+    durationSeconds: 20,
+    choices: [
+      { text: 'Paris', isCorrect: false },
+      { text: 'Londres', isCorrect: false },
+    ],
+  });
+  assert.equal(status, 400);
+  assert.equal(typeof data.error, 'string');
+});
+
+test('une question avec deux bonnes réponses est refusée (400)', async () => {
+  const { data: quiz } = await api.request('POST', '/api/quizzes', { title: 'Capitales' });
+
+  const { status, data } = await api.request('POST', `/api/quizzes/${quiz.id}/questions`, {
+    text: 'Quelle est la capitale de la France ?',
+    durationSeconds: 20,
+    choices: [
+      { text: 'Paris', isCorrect: true },
+      { text: 'Londres', isCorrect: true },
+    ],
+  });
+  assert.equal(status, 400);
+  assert.equal(typeof data.error, 'string');
+});
+
+test('une question valide est ajoutée et apparaît dans GET /api/quizzes/:id', async () => {
+  const { data: quiz } = await api.request('POST', '/api/quizzes', { title: 'Capitales' });
+
+  const { status: postStatus } = await api.request('POST', `/api/quizzes/${quiz.id}/questions`, {
+    text: 'Quelle est la capitale de la France ?',
+    durationSeconds: 20,
+    choices: [
+      { text: 'Paris', isCorrect: true },
+      { text: 'Londres', isCorrect: false },
+    ],
+  });
+  assert.equal(postStatus, 201);
+
+  const { status: getStatus, data: getData } = await api.request('GET', `/api/quizzes/${quiz.id}`);
+  assert.equal(getStatus, 200);
+  assert.equal(getData.title, 'Capitales');
+  assert.equal(getData.questions.length, 1);
+  assert.equal(getData.questions[0].text, 'Quelle est la capitale de la France ?');
+  assert.equal(getData.questions[0].choices.length, 2);
+});
 
 // ── Jalon 3 : d'abord le test qui échoue, ensuite la correction ───────────
 

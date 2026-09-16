@@ -44,8 +44,23 @@ test('bonne réponse après l’échéance = 0', () => {
 //
 // Remplacez chaque test.todo par un vrai test.
 
-test.todo('réponse exactement à l’échéance = 5 (acceptée, bonus rapidité 0)');
-test.todo('mauvaise réponse, même première et instantanée = 0');
-test.todo('première bonne réponse hors délai = 0 (pas de bonus)');
-test.todo('le bonus de rapidité ne dépasse jamais 3');
-test.todo('le résultat est toujours un entier de 0 à 10');
+test('réponse exactement à l’échéance = 5 (acceptée, bonus rapidité 0)', () => {
+  assert.equal(score({ responseTimeMs: 20000 }), 5);
+});
+  
+test('mauvaise réponse, même première et instantanée = 0', () => {
+  assert.equal(score({ isCorrect: false, isFirstCorrectAnswer: true, responseTimeMs: 0 }), 0);
+});
+test('première bonne réponse hors délai = 0 (pas de bonus)', () => {
+  assert.equal(score({ isFirstCorrectAnswer: true, responseTimeMs: 25000 }), 0);
+});
+test('le bonus de rapidité ne dépasse jamais 3', () => {
+  assert.equal(score({ responseTimeMs: 0, questionDurationMs: 10000 }), 8);
+});
+test('le résultat est toujours un entier de 0 à 10', () => {
+  for (let responseTimeMs = -1000; responseTimeMs <= 30000; responseTimeMs += 5000) {
+    const result = score({ responseTimeMs });
+    assert.equal(Number.isInteger(result), true);
+    assert.ok(result >= 0 && result <= 10);
+  }
+});
