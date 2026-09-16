@@ -17,15 +17,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-=======
       - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v7
->>>>>>> a53a2f4f92aaa809e0a65d070a33ecedf1e0ed67
         with:
           node-version: 24
           cache: npm
@@ -42,11 +36,7 @@ jobs:
       contents: read
       packages: write   # publier dans ghcr.io
     steps:
-<<<<<<< HEAD
-      - uses: actions/checkout@v4
-=======
       - uses: actions/checkout@v7
->>>>>>> a53a2f4f92aaa809e0a65d070a33ecedf1e0ed67
 
       # GITHUB_TOKEN est fourni par GitHub à chaque exécution : pas de secret
       # à créer. Le nom du propriétaire doit être en minuscules pour ghcr.io.
